@@ -2,12 +2,11 @@ var createError = require("http-errors");
 var express = require("express");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
+require("./config/db");
 var indexRouter = require("./routes");
-var palywrightRouter = require("./routes/playwright");
 var questionRouter = require("./routes/question");
 var app = express();
 const cors = require("cors");
-require("./config/db");
 
 app.use(cors());
 app.use(logger("dev"));
@@ -16,7 +15,6 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 app.use("/", indexRouter);
-app.use("/playwright", palywrightRouter);
 app.use("/question", questionRouter);
 
 // catch 404 and forward to error handler

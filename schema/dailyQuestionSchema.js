@@ -2,7 +2,8 @@ const mongoose = require("mongoose");
 
 const dailyQuestionSchema = mongoose.Schema({
   question_id: {
-    type: Number,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Questions",
     required: true,
   },
   date: {
@@ -10,6 +11,7 @@ const dailyQuestionSchema = mongoose.Schema({
     required: true,
     default: Date.now,
   },
+  user_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
-module.exports = mongoose.model("dailyQuestion", dailyQuestionSchema);
+module.exports = mongoose.model("DailyQuestion", dailyQuestionSchema);

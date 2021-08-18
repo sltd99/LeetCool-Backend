@@ -28,7 +28,19 @@ const questionSchema = mongoose.Schema({
     required: true,
   },
   question_answers: [
-    { answer: String, date: { type: Date, default: Date.now }, user: String },
+    {
+      question_answer: {
+        type: String,
+      },
+      question_date: {
+        type: Date,
+        default: Date.now,
+      },
+      user_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    },
   ],
   question_is_answered: {
     type: Boolean,
@@ -40,4 +52,4 @@ const questionSchema = mongoose.Schema({
   },
 });
 
-module.exports = mongoose.model("questions", questionSchema);
+module.exports = mongoose.model("Questions", questionSchema);
