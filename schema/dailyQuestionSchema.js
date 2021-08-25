@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const dailyQuestionSchema = mongoose.Schema({
-  question_id: {
+  question: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Questions",
     required: true,
@@ -11,7 +11,7 @@ const dailyQuestionSchema = mongoose.Schema({
     required: true,
     default: Date.now,
   },
-  user_id: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  users: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
 });
 
 module.exports = mongoose.model("DailyQuestion", dailyQuestionSchema);

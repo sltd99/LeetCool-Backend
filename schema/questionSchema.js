@@ -27,7 +27,7 @@ const questionSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  question_answers: [
+  answers: [
     {
       question_answer: {
         type: String,
@@ -36,7 +36,7 @@ const questionSchema = mongoose.Schema({
         type: Date,
         default: Date.now,
       },
-      user_id: {
+      user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
       },
