@@ -69,8 +69,15 @@ router.get("/:question_id", async (req, res) => {
 
 router.get("/", async (req, res) => {
   try {
+    const questionFilter =
+      req.query.question_is_answered === "true"
+        ? {
+            question_is_answered: true,
+          }
+        : {}
+
     const [questions, daily] = await Promise.all([
-      Question.find({ question_is_answered: true }, [
+      Question.find(questionFilter, [
         "question_id",
         "question_title",
         "question_difficulty",
