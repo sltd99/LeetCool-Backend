@@ -27,7 +27,7 @@ const questionSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  answers: [
+  question_answers: [
     {
       question_answer: {
         type: String,

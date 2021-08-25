@@ -3,7 +3,7 @@ const router = express.Router();
 const Question = require("../schema/questionSchema");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
 const QuestionAmount = require("../schema/questionAmountSchema");
-const UserSchema = require("../schema/userSchema");
+const User = require("../schema/userSchema");
 const axios = require("axios");
 const playwright = require("./playwright");
 const { chromium } = require("playwright-chromium");
@@ -11,22 +11,34 @@ require("dotenv/config");
 
 router.post("/:question_id/solution", async (req, res) => {
   const { question_id } = req.params;
-  const { answer } = req.body;
+  const { question_answers } = req.body;
   try {
     const answerExists = await Question.find({
       question_id: question_id,
-      "answers.user": answer.user,
+      "question_answers.user": question_answers.user,
     });
     if (answerExists.length) {
-      res.json({ message: "user already answered" });
-      return;
+      console.log(answerExists);
+      await Question.updateOne(
+        {
+          question_id: question_id,
+          "question_answers.user": question_answers.user,
+        },
+        {
+          $set: {
+            "question_answers.$.question_answer":
+              question_answers.question_answer,
+          },
+        }
+      );
+      res.json("sadfas");
     } else {
-      answer.question_date = Date.now();
+      question_answers.question_date = Date.now();
       const query = {
         question_id: question_id,
       };
       const update = {
-        $push: { answers: answer },
+        $push: { question_answers: question_answers },
         $set: {
           question_last_submit_date: Date.now(),
           question_is_answered: true,
@@ -50,15 +62,32 @@ router.post("/:question_id/solution", async (req, res) => {
 router.get("/:question_id", async (req, res) => {
   try {
     const { question_id } = req.params;
+    const { user_id } = req.query;
 
     const question = await Question.findOne({
       question_id: question_id,
     }).populate({
-      path: "answers.user",
+      path: "question_answers.user",
       select: "user_name",
     });
     if (question) {
-      res.json(question);
+      if (user_id && question.question_answers.length > 0) {
+        const answer = question.question_answers.filter(
+          (answer) => answer.user._id == user_id
+        );
+        const result = {
+          question_tags: question.question_tags,
+          question_id: question.question_id,
+          question_url: question.question_url,
+          question_title: question.question_title,
+          question_difficulty: question.question_difficulty,
+          question_content: question.question_content,
+          question_answer: answer[0].question_answer,
+        };
+        res.json(result);
+      } else {
+        res.json(question);
+      }
     } else {
       res.json({ message: "No such question id" });
     }
@@ -74,7 +103,7 @@ router.get("/", async (req, res) => {
         ? {
             question_is_answered: true,
           }
-        : {}
+        : {};
 
     const [questions, daily] = await Promise.all([
       Question.find(questionFilter, [
@@ -83,10 +112,10 @@ router.get("/", async (req, res) => {
         "question_difficulty",
         "question_tags",
         "question_last_submit_date",
-        "answers.user",
+        "question_answers.user",
       ])
         .populate({
-          path: "answers.user",
+          path: "question_answers.user",
           select: "user_name",
         })
         .sort({ question_last_submit_date: "descending" }),
@@ -110,32 +139,6 @@ router.get("/", async (req, res) => {
     }
   } catch (error) {
     res.json({ message: "Fuck, all-questions出bug了" });
-  }
-});
-
-router.post("/daily-solution", async (req, res) => {
-  const { question_id, question_answers } = req.body;
-  try {
-    question_answers.question_date = Date.now();
-    const query = { question_id: question_id };
-    const update = {
-      $push: { question_answers: question_answers },
-      $set: {
-        question_last_submit_date: Date.now(),
-        question_is_answered: true,
-      },
-    };
-    const options = {
-      upsert: true,
-      new: true,
-      setDefaultsOnInsert: true,
-    };
-    const result = await Question.findOneAndUpdate(query, update, options);
-    if (result) {
-      res.json({ message: "success" });
-    }
-  } catch (error) {
-    res.json({ message: "Fuck, saveSolution出bug了" });
   }
 });
 
@@ -198,11 +201,11 @@ router.get("/fetch-daily", async (req, res) => {
     const context = await broswer.newContext();
     const page = await context.newPage();
     const question_id = await playwright.getDailyQuestionUrl(page);
-    const { _id, answers } = await Question.findOne({
-      question_id: question_id,
+    const { _id, question_answers } = await Question.findOne({
+      question_id: "1971",
     });
     let users = [];
-    for (var answer of answers) {
+    for (var answer of question_answers) {
       users.push(answer.user);
     }
 
