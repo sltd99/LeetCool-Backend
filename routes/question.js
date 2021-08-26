@@ -28,10 +28,11 @@ router.post("/:question_id/solution", async (req, res) => {
           $set: {
             "question_answers.$.question_answer":
               question_answers.question_answer,
+            question_last_submit_date: Date.now(),
           },
         }
       );
-      res.json("sadfas");
+      res.json({ message: "success" });
     } else {
       question_answers.question_date = Date.now();
       const query = {
@@ -59,10 +60,10 @@ router.post("/:question_id/solution", async (req, res) => {
   }
 });
 
-router.get("/:question_id", async (req, res) => {
+router.post("/:question_id", async (req, res) => {
   try {
     const { question_id } = req.params;
-    const { user_id } = req.query;
+    const { user_id } = req.body;
 
     const question = await Question.findOne({
       question_id: question_id,
@@ -82,7 +83,7 @@ router.get("/:question_id", async (req, res) => {
           question_title: question.question_title,
           question_difficulty: question.question_difficulty,
           question_content: question.question_content,
-          question_answer: answer[0].question_answer,
+          question_answer: answer.length != 0 ? answer[0].question_answer : "",
         };
         res.json(result);
       } else {
