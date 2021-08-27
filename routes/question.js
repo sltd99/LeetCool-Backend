@@ -17,9 +17,9 @@ router.post("/:question_id/solution", async (req, res) => {
       question_id: question_id,
       "question_answers.user": question_answers.user,
     });
-    console.log(answerExists[0]._id);
     saveToDaily(answerExists[0]._id, question_answers.user);
     if (answerExists.length) {
+      console.log(answerExists);
       await Question.updateOne(
         {
           question_id: question_id,
@@ -64,7 +64,6 @@ router.post("/:question_id/solution", async (req, res) => {
 async function saveToDaily(question_id, user_id) {
   const todayDaily = await DailyQuestion.findOne().sort({ _id: -1 });
 
-  console.log(user_id);
   if (todayDaily.question === question_id) {
     console.log("not today's qeustion");
     return false;
@@ -107,9 +106,8 @@ router.post("/:question_id", async (req, res) => {
           question_title: question.question_title,
           question_difficulty: question.question_difficulty,
           question_content: question.question_content,
-          question_answer: answer.length != 0 ? answer[0].question_answer : " ",
+          question_answer: answer.length != 0 ? answer[0].question_answer : "",
         };
-        console.log(result);
         res.json(result);
       } else {
         res.json(question);
@@ -185,7 +183,7 @@ router.get("/refersh-question-list", async (req, res) => {
         { id: 1 },
         { question_amount: newNumTotal }
       );
-      for (var i = 0; i < 5; i++) {
+      for (var i = 0; i < newNumTotal - question_amount; i++) {
         if (questions[i].paid_only) {
           continue;
         }
@@ -236,7 +234,7 @@ router.get("/fetch-daily", async (req, res) => {
     const page = await context.newPage();
     const question_id = await playwright.getDailyQuestionUrl(page);
     const { _id, question_answers } = await Question.findOne({
-      question_id: "1971",
+      question_id: question_id,
     });
     let users = [];
     for (var answer of question_answers) {
