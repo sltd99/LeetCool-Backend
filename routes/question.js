@@ -17,8 +17,9 @@ router.post("/:question_id/solution", async (req, res) => {
       question_id: question_id,
       "question_answers.user": question_answers.user,
     });
+    console.log(answerExists[0]._id);
+    saveToDaily(answerExists[0]._id, question_answers.user);
     if (answerExists.length) {
-      console.log(answerExists);
       await Question.updateOne(
         {
           question_id: question_id,
@@ -60,6 +61,29 @@ router.post("/:question_id/solution", async (req, res) => {
   }
 });
 
+async function saveToDaily(question_id, user_id) {
+  const todayDaily = await DailyQuestion.findOne().sort({ _id: -1 });
+
+  console.log(user_id);
+  if (todayDaily.question === question_id) {
+    console.log("not today's qeustion");
+    return false;
+  }
+  const query = {
+    _id: todayDaily._id,
+  };
+  const update = {
+    $push: { users: user_id },
+  };
+  const options = {
+    upsert: true,
+    new: true,
+    setDefaultsOnInsert: true,
+  };
+  const teemp = await DailyQuestion.updateOne(query, update, options);
+  return true;
+}
+
 router.post("/:question_id", async (req, res) => {
   try {
     const { question_id } = req.params;
@@ -83,8 +107,9 @@ router.post("/:question_id", async (req, res) => {
           question_title: question.question_title,
           question_difficulty: question.question_difficulty,
           question_content: question.question_content,
-          question_answer: answer.length != 0 ? answer[0].question_answer : "",
+          question_answer: answer.length != 0 ? answer[0].question_answer : " ",
         };
+        console.log(result);
         res.json(result);
       } else {
         res.json(question);
@@ -156,6 +181,10 @@ router.get("/refersh-question-list", async (req, res) => {
       const questions = data.stat_status_pairs;
       const newNumTotal = data.num_total;
       const { question_amount } = await QuestionAmount.findOne({ id: 1 });
+      const savedQuestionAmount = await QuestionAmount.findOneAndUpdate(
+        { id: 1 },
+        { question_amount: newNumTotal }
+      );
       for (var i = 0; i < 5; i++) {
         if (questions[i].paid_only) {
           continue;
@@ -170,20 +199,24 @@ router.get("/refersh-question-list", async (req, res) => {
           "https://leetcode.com/problems/" +
           questions[i].stat.question__title_slug +
           "/";
-        const { question_difficulty, question_tags, question_content } =
-          await playwright.getQuestionDetail(page, question_url);
-
-        const question = new Question({
-          question_id: question_id,
-          question_url: question_url,
-          question_title: question_title,
-          question_difficulty: question_difficulty,
-          question_tags: question_tags,
-          question_content: question_content,
-        });
-        const saved = await question.save();
-        console.log(question_url, " added");
+        try {
+          const { question_difficulty, question_tags, question_content } =
+            await playwright.getQuestionDetail(page, question_url);
+          const question = new Question({
+            question_id: question_id,
+            question_url: question_url,
+            question_title: question_title,
+            question_difficulty: question_difficulty,
+            question_tags: question_tags,
+            question_content: question_content,
+          });
+          const saved = await question.save();
+        } catch (error) {
+          console.log(question_url, " error");
+          continue;
+        }
       }
+
       await page.close();
       await context.close();
       await broswer.close();
