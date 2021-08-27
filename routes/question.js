@@ -1,24 +1,24 @@
-const express = require("express");
-const router = express.Router();
-const Question = require("../schema/questionSchema");
-const DailyQuestion = require("../schema/dailyQuestionSchema");
-const QuestionAmount = require("../schema/questionAmountSchema");
-const User = require("../schema/userSchema");
-const axios = require("axios");
-const playwright = require("./playwright");
-const { chromium } = require("playwright-chromium");
-require("dotenv/config");
+const express = require("express")
+const router = express.Router()
+const Question = require("../schema/questionSchema")
+const DailyQuestion = require("../schema/dailyQuestionSchema")
+const QuestionAmount = require("../schema/questionAmountSchema")
+const User = require("../schema/userSchema")
+const axios = require("axios")
+const playwright = require("./playwright")
+const { chromium } = require("playwright-chromium")
+require("dotenv/config")
 
 router.post("/:question_id/solution", async (req, res) => {
-  const { question_id } = req.params;
-  const { question_answers } = req.body;
+  const { question_id } = req.params
+  const { question_answers } = req.body
   try {
     const answerExists = await Question.find({
       question_id: question_id,
       "question_answers.user": question_answers.user,
-    });
+    })
     if (answerExists.length) {
-      console.log(answerExists);
+      console.log(answerExists)
       await Question.updateOne(
         {
           question_id: question_id,
@@ -26,56 +26,53 @@ router.post("/:question_id/solution", async (req, res) => {
         },
         {
           $set: {
-            "question_answers.$.question_answer":
-              question_answers.question_answer,
+            "question_answers.$.question_answer": question_answers.question_answer,
             question_last_submit_date: Date.now(),
           },
         }
-      );
-      res.json({ message: "success" });
+      )
+      res.json({ message: "success" })
     } else {
-      question_answers.question_date = Date.now();
+      question_answers.question_date = Date.now()
       const query = {
         question_id: question_id,
-      };
+      }
       const update = {
         $push: { question_answers: question_answers },
         $set: {
           question_last_submit_date: Date.now(),
           question_is_answered: true,
         },
-      };
+      }
       const options = {
         upsert: true,
         new: true,
         setDefaultsOnInsert: true,
-      };
-      const result = await Question.findOneAndUpdate(query, update, options);
+      }
+      const result = await Question.findOneAndUpdate(query, update, options)
       if (result) {
-        res.json({ message: "success" });
+        res.json({ message: "success" })
       }
     }
   } catch (error) {
-    res.json({ message: "Fuck, saveSolution出bug了" });
+    res.json({ message: "Fuck, saveSolution出bug了" })
   }
-});
+})
 
 router.post("/:question_id", async (req, res) => {
   try {
-    const { question_id } = req.params;
-    const { user_id } = req.body;
+    const { question_id } = req.params
+    const { user_id } = req.body
 
     const question = await Question.findOne({
       question_id: question_id,
     }).populate({
       path: "question_answers.user",
       select: "user_name",
-    });
+    })
     if (question) {
       if (user_id && question.question_answers.length > 0) {
-        const answer = question.question_answers.filter(
-          (answer) => answer.user._id == user_id
-        );
+        const answer = question.question_answers.filter(answer => answer.user._id == user_id)
         const result = {
           question_tags: question.question_tags,
           question_id: question.question_id,
@@ -84,18 +81,18 @@ router.post("/:question_id", async (req, res) => {
           question_difficulty: question.question_difficulty,
           question_content: question.question_content,
           question_answer: answer.length != 0 ? answer[0].question_answer : "",
-        };
-        res.json(result);
+        }
+        res.json(result)
       } else {
-        res.json(question);
+        res.json(question)
       }
     } else {
-      res.json({ message: "No such question id" });
+      res.json({ message: "No such question id" })
     }
   } catch (error) {
-    res.json({ message: "Fuck, getQuestionById出bug了" });
+    res.json({ message: "Fuck, getQuestionById出bug了" })
   }
-});
+})
 
 router.get("/", async (req, res) => {
   try {
@@ -104,7 +101,7 @@ router.get("/", async (req, res) => {
         ? {
             question_is_answered: true,
           }
-        : {};
+        : {}
 
     const [questions, daily] = await Promise.all([
       Question.find(questionFilter, [
@@ -131,47 +128,43 @@ router.get("/", async (req, res) => {
           path: "users",
           select: "user_name",
         }),
-    ]);
+    ])
 
     if (daily && questions) {
-      res.json({ daily, questions });
+      res.json({ daily, questions })
     } else {
-      res.sendStatus(500);
+      res.sendStatus(500)
     }
   } catch (error) {
-    res.json({ message: "Fuck, all-questions出bug了" });
+    res.json({ message: "Fuck, all-questions出bug了" })
   }
-});
+})
 
 router.get("/refersh-question-list", async (req, res) => {
   try {
-    const { data } = await axios.get(
-      "https://leetcode.com/api/problems/algorithms/"
-    );
+    const { data } = await axios.get("https://leetcode.com/api/problems/algorithms/")
 
     if (data) {
-      const broswer = await chromium.launch({ chromiumSandbox: false });
-      const context = await broswer.newContext();
-      const page = await context.newPage();
-      const questions = data.stat_status_pairs;
-      const newNumTotal = data.num_total;
-      const { question_amount } = await QuestionAmount.findOne({ id: 1 });
-      for (var i = 0; i < 5; i++) {
+      const broswer = await chromium.launch({ chromiumSandbox: false })
+      const context = await broswer.newContext()
+      const page = await context.newPage()
+      const questions = data.stat_status_pairs
+      const newNumTotal = data.num_total
+      const { question_amount } = await QuestionAmount.findOne({ id: 1 })
+      for (var i = 0; i < newNumTotal; i++) {
         if (questions[i].paid_only) {
-          continue;
+          continue
         }
-        const question_id = questions[i].stat.frontend_question_id;
-        const exists = await Question.findOne({ question_id: question_id });
+        const question_id = questions[i].stat.frontend_question_id
+        const exists = await Question.findOne({ question_id: question_id })
         if (exists) {
-          continue;
+          continue
         }
-        const question_title = questions[i].stat.question__title;
+        const question_title = questions[i].stat.question__title
         const question_url =
-          "https://leetcode.com/problems/" +
-          questions[i].stat.question__title_slug +
-          "/";
+          "https://leetcode.com/problems/" + questions[i].stat.question__title_slug + "/"
         const { question_difficulty, question_tags, question_content } =
-          await playwright.getQuestionDetail(page, question_url);
+          await playwright.getQuestionDetail(page, question_url)
 
         const question = new Question({
           question_id: question_id,
@@ -180,49 +173,49 @@ router.get("/refersh-question-list", async (req, res) => {
           question_difficulty: question_difficulty,
           question_tags: question_tags,
           question_content: question_content,
-        });
-        const saved = await question.save();
-        console.log(question_url, " added");
+        })
+        const saved = await question.save()
+        console.log(question_url, " added")
       }
-      await page.close();
-      await context.close();
-      await broswer.close();
-      res.json({ message: "success" });
+      await page.close()
+      await context.close()
+      await broswer.close()
+      res.json({ message: "success" })
     } else {
-      res.json({ message: "fail" });
+      res.json({ message: "fail" })
     }
   } catch (error) {
-    res.json({ message: "error" });
+    res.json({ message: "error" })
   }
-});
+})
 
 router.get("/fetch-daily", async (req, res) => {
   try {
-    const broswer = await chromium.launch({ chromiumSandbox: false });
-    const context = await broswer.newContext();
-    const page = await context.newPage();
-    const question_id = await playwright.getDailyQuestionUrl(page);
+    const broswer = await chromium.launch({ chromiumSandbox: false })
+    const context = await broswer.newContext()
+    const page = await context.newPage()
+    const question_id = await playwright.getDailyQuestionUrl(page)
     const { _id, question_answers } = await Question.findOne({
       question_id: "1971",
-    });
-    let users = [];
+    })
+    let users = []
     for (var answer of question_answers) {
-      users.push(answer.user);
+      users.push(answer.user)
     }
 
     const dailyQuestion = new DailyQuestion({
       question: _id,
       data: Date.now(),
       users: users,
-    });
-    const savedDailyQuestion = await dailyQuestion.save();
+    })
+    const savedDailyQuestion = await dailyQuestion.save()
 
-    await page.close();
-    await context.close();
-    await broswer.close();
-    res.json({ message: "success" });
+    await page.close()
+    await context.close()
+    await broswer.close()
+    res.json({ message: "success" })
   } catch (error) {
-    res.json({ message: "Fuck, fetchDaily出bug了" });
+    res.json({ message: "Fuck, fetchDaily出bug了" })
   }
-});
-module.exports = router;
+})
+module.exports = router
