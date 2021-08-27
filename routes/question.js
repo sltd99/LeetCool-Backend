@@ -17,9 +17,7 @@ router.post("/:question_id/solution", async (req, res) => {
       question_id: question_id,
       "question_answers.user": question_answers.user,
     });
-    saveToDaily(answerExists[0]._id, question_answers.user);
     if (answerExists.length) {
-      console.log(answerExists);
       await Question.updateOne(
         {
           question_id: question_id,
@@ -33,6 +31,7 @@ router.post("/:question_id/solution", async (req, res) => {
           },
         }
       );
+      await saveToDaily(answerExists[0]._id, question_answers.user);
       res.json({ message: "success" });
     } else {
       question_answers.question_date = Date.now();
@@ -52,6 +51,8 @@ router.post("/:question_id/solution", async (req, res) => {
         setDefaultsOnInsert: true,
       };
       const result = await Question.findOneAndUpdate(query, update, options);
+      await saveToDaily(answerExists[0]._id, question_answers.user);
+
       if (result) {
         res.json({ message: "success" });
       }
@@ -63,7 +64,7 @@ router.post("/:question_id/solution", async (req, res) => {
 
 async function saveToDaily(question_id, user_id) {
   const todayDaily = await DailyQuestion.findOne().sort({ _id: -1 });
-
+  console.log(question_id, user_id);
   if (todayDaily.question === question_id) {
     console.log("not today's qeustion");
     return false;
@@ -175,7 +176,6 @@ router.get("/refersh-question-list", async (req, res) => {
     if (data) {
       const broswer = await chromium.launch({ chromiumSandbox: false });
       const context = await broswer.newContext();
-      const page = await context.newPage();
       const questions = data.stat_status_pairs;
       const newNumTotal = data.num_total;
       const { question_amount } = await QuestionAmount.findOne({ id: 1 });
@@ -198,6 +198,7 @@ router.get("/refersh-question-list", async (req, res) => {
           questions[i].stat.question__title_slug +
           "/";
         try {
+          const page = await context.newPage();
           const { question_difficulty, question_tags, question_content } =
             await playwright.getQuestionDetail(page, question_url);
           const question = new Question({
@@ -209,13 +210,14 @@ router.get("/refersh-question-list", async (req, res) => {
             question_content: question_content,
           });
           const saved = await question.save();
+          await page.close();
         } catch (error) {
+          await page.close();
           console.log(question_url, " error");
           continue;
         }
       }
 
-      await page.close();
       await context.close();
       await broswer.close();
       res.json({ message: "success" });
