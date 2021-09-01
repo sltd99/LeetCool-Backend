@@ -11,7 +11,7 @@ const User = require("../schema/userSchema");
 function setFetchDailyRule() {
   console.log("setFetchDailyRule starts");
   const rule = new schedule.RecurrenceRule();
-  rule.hour = 0;
+  rule.hour = 1;
   rule.minute = 30;
   rule.tz = "PST";
   schedule.scheduleJob(rule, async () => {
@@ -74,8 +74,8 @@ function setSendDailyReportRule() {
 function setRefreshQuestionListRule() {
   console.log("setRefreshQuestionListRule starts");
   const rule = new schedule.RecurrenceRule();
-  rule.hour = 0;
-  rule.minute = 0;
+  rule.hour = 1;
+  rule.minute = 1;
   rule.tz = "PST";
   schedule.scheduleJob(rule, async () => {
     try {
