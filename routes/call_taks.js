@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-// const rules = require("../timer_task/rules");
+const rules = require("../timer_task/rules");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
 const User = require("../schema/userSchema");
 const FetchDaily = require("../timer_task/playwright/fetch_daily");
