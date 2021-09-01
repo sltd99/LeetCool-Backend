@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const rules = require("../timer_task/rules");
+// const rules = require("../timer_task/rules");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
 const User = require("../schema/userSchema");
 const FetchDaily = require("../timer_task/playwright/fetch_daily");
@@ -16,7 +16,7 @@ router.get("/send-daily-report", async (req, res) => {
   const allUsers = await User.find().select("user_email user_name");
   let recipients = "";
   allUsers.map((user) => {
-    recipients += user.user_email + " ";
+    recipients += user.user_email + ", ";
   });
   const subject = "~ o(*￣▽￣*)o Daily Report From Leetcool";
   const usersDid = dailyUsers.users;

@@ -14,7 +14,7 @@ function setFetchDailyRule() {
   // rule.hour = 1;
   // rule.minute = 30;
   // rule.tz = "PST";
-  schedule.scheduleJob({ hour: 5, minute: 30 }, async () => {
+  schedule.scheduleJob({ hour: 0, minute: 30, tz: "PST" }, async () => {
     try {
       const question_id = await fetchDaily();
       await sendMail(
@@ -40,7 +40,7 @@ function setSendDailyReportRule() {
   // rule.hour = 21;
   // rule.minute = 29;
   // rule.tz = "EST";
-  schedule.scheduleJob({ hour: 21, minute: 30 }, async () => {
+  schedule.scheduleJob({ hour: 21, minute: 29, tz: "EST" }, async () => {
     try {
       const dailyUsers = await DailyQuestion.findOne()
         .sort({ _id: -1 })
@@ -77,24 +77,27 @@ function setRefreshQuestionListRule() {
   // rule.hour = 1;
   // rule.minute = 1;
   // rule.tz = "PST";
-  schedule.scheduleJob({ hour: 5, minute: 5 }, async () => {
-    try {
-      await refreshQuestionList();
-      await sendMail(
-        "qq836482561@gmail.com, hlin3517@gmail.com",
-        "Refreshed Question List",
-        `Message from leetcool \n Refreshed Question List`
-      );
-      console.log("Refresh Question Lis Finished");
-    } catch (error) {
-      await sendMail(
-        "qq836482561@gmail.com, hlin3517@gmail.com",
-        "Refreshed Question List",
-        `Message from leetcool \n Refreshed Question List`
-      );
-      console.log("Refresh Question List Error");
+  schedule.scheduleJob(
+    { hour: 0, minute: 1, dayOfWeek: 0, tz: "PST" },
+    async () => {
+      try {
+        await refreshQuestionList();
+        await sendMail(
+          "qq836482561@gmail.com, hlin3517@gmail.com",
+          "Refreshed Question List",
+          `Message from leetcool \n Refreshed Question List`
+        );
+        console.log("Refresh Question Lis Finished");
+      } catch (error) {
+        await sendMail(
+          "qq836482561@gmail.com, hlin3517@gmail.com",
+          "Refreshed Question List",
+          `Message from leetcool \n Refreshed Question List`
+        );
+        console.log("Refresh Question List Error");
+      }
     }
-  });
+  );
 }
 
 setSendDailyReportRule();
