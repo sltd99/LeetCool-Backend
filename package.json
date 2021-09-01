@@ -7,6 +7,7 @@
     "dev": "nodemon ./bin/www"
   },
   "dependencies": {
+    "agenda": "^4.2.1",
     "axios": "^0.21.1",
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
@@ -15,8 +16,10 @@
     "express": "~4.16.1",
     "googleapis": "^84.0.0",
     "http-errors": "~1.6.3",
+    "moment": "^2.29.1",
     "mongoose": "^5.13.7",
     "morgan": "~1.9.1",
+    "node-schedule": "^2.0.0",
     "nodemailer": "^6.6.3",
     "playwright-chromium": "^1.13.1"
   },

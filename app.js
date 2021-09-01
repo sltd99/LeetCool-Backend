@@ -1,12 +1,13 @@
 require("dotenv/config");
+require("./config/db");
 var createError = require("http-errors");
 var express = require("express");
 var cookieParser = require("cookie-parser");
 var logger = require("morgan");
-require("./config/db");
 var indexRouter = require("./routes");
 var questionRouter = require("./routes/question");
 var userRouter = require("./routes/user");
+var callTaksRouter = require("./routes/call_taks");
 var app = express();
 const cors = require("cors");
 
@@ -19,6 +20,7 @@ app.use(cookieParser());
 app.use("/", indexRouter);
 app.use("/questions", questionRouter);
 app.use("/users", userRouter);
+app.use("/call-tasks", callTaksRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

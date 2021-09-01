@@ -2,16 +2,13 @@ const express = require("express");
 const router = express.Router();
 const Question = require("../schema/questionSchema");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
-const QuestionAmount = require("../schema/questionAmountSchema");
+const CommonVariable = require("../schema/commonVariableSchema");
 const User = require("../schema/userSchema");
-const axios = require("axios");
-const playwright = require("./playwright");
-const { chromium } = require("playwright-chromium");
-require("dotenv/config");
 
 router.post("/:question_id/solution", async (req, res) => {
   const { question_id } = req.params;
   const { question_answers } = req.body;
+  question_answers.question_date = Date.now();
   try {
     const answerExists = await Question.find({
       question_id: question_id,
@@ -34,7 +31,6 @@ router.post("/:question_id/solution", async (req, res) => {
       await saveToDaily(answerExists[0]._id, question_answers.user);
       res.json({ message: "success" });
     } else {
-      question_answers.question_date = Date.now();
       const query = {
         question_id: question_id,
       };
@@ -51,8 +47,10 @@ router.post("/:question_id/solution", async (req, res) => {
         setDefaultsOnInsert: true,
       };
       const result = await Question.findOneAndUpdate(query, update, options);
-      await saveToDaily(answerExists[0]._id, question_answers.user);
-
+      await saveToDaily(result._id, question_answers.user);
+      const user = await User.findById(question_answers.user);
+      user.total_question_amount = user.total_question_amount + 1;
+      await user.save();
       if (result) {
         res.json({ message: "success" });
       }
@@ -63,25 +61,27 @@ router.post("/:question_id/solution", async (req, res) => {
 });
 
 async function saveToDaily(question_id, user_id) {
-  const todayDaily = await DailyQuestion.findOne().sort({ _id: -1 });
-  console.log(question_id, user_id);
-  if (todayDaily.question === question_id) {
-    console.log("not today's qeustion");
+  try {
+    const todayDaily = await DailyQuestion.findOne().sort({ _id: -1 });
+    if (todayDaily.question.toString() !== question_id.toString()) {
+      return false;
+    }
+    const query = {
+      _id: todayDaily._id,
+    };
+    const update = {
+      $push: { users: user_id },
+    };
+    const options = {
+      upsert: true,
+      new: true,
+      setDefaultsOnInsert: true,
+    };
+    const teemp = await DailyQuestion.updateOne(query, update, options);
+    return true;
+  } catch (error) {
     return false;
   }
-  const query = {
-    _id: todayDaily._id,
-  };
-  const update = {
-    $push: { users: user_id },
-  };
-  const options = {
-    upsert: true,
-    new: true,
-    setDefaultsOnInsert: true,
-  };
-  const teemp = await DailyQuestion.updateOne(query, update, options);
-  return true;
 }
 
 router.post("/:question_id", async (req, res) => {
@@ -167,95 +167,4 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.get("/refersh-question-list", async (req, res) => {
-  try {
-    const { data } = await axios.get(
-      "https://leetcode.com/api/problems/algorithms/"
-    );
-
-    if (data) {
-      const broswer = await chromium.launch({ chromiumSandbox: false });
-      const context = await broswer.newContext();
-      const questions = data.stat_status_pairs;
-      const newNumTotal = data.num_total;
-      const { question_amount } = await QuestionAmount.findOne({ id: 1 });
-      const savedQuestionAmount = await QuestionAmount.findOneAndUpdate(
-        { id: 1 },
-        { question_amount: newNumTotal }
-      );
-      for (var i = 0; i < newNumTotal - question_amount; i++) {
-        if (questions[i].paid_only) {
-          continue;
-        }
-        const question_id = questions[i].stat.frontend_question_id;
-        const exists = await Question.findOne({ question_id: question_id });
-        if (exists) {
-          continue;
-        }
-        const question_title = questions[i].stat.question__title;
-        const question_url =
-          "https://leetcode.com/problems/" +
-          questions[i].stat.question__title_slug +
-          "/";
-        try {
-          const page = await context.newPage();
-          const { question_difficulty, question_tags, question_content } =
-            await playwright.getQuestionDetail(page, question_url);
-          const question = new Question({
-            question_id: question_id,
-            question_url: question_url,
-            question_title: question_title,
-            question_difficulty: question_difficulty,
-            question_tags: question_tags,
-            question_content: question_content,
-          });
-          const saved = await question.save();
-          await page.close();
-        } catch (error) {
-          await page.close();
-          console.log(question_url, " error");
-          continue;
-        }
-      }
-
-      await context.close();
-      await broswer.close();
-      res.json({ message: "success" });
-    } else {
-      res.json({ message: "fail" });
-    }
-  } catch (error) {
-    res.json({ message: "error" });
-  }
-});
-
-router.get("/fetch-daily", async (req, res) => {
-  try {
-    const broswer = await chromium.launch({ chromiumSandbox: false });
-    const context = await broswer.newContext();
-    const page = await context.newPage();
-    const question_id = await playwright.getDailyQuestionUrl(page);
-    const { _id, question_answers } = await Question.findOne({
-      question_id: question_id,
-    });
-    let users = [];
-    for (var answer of question_answers) {
-      users.push(answer.user);
-    }
-
-    const dailyQuestion = new DailyQuestion({
-      question: _id,
-      data: Date.now(),
-      users: users,
-    });
-    const savedDailyQuestion = await dailyQuestion.save();
-
-    await page.close();
-    await context.close();
-    await broswer.close();
-    res.json({ message: "success" });
-  } catch (error) {
-    res.json({ message: "Fuck, fetchDaily出bug了" });
-  }
-});
 module.exports = router;
