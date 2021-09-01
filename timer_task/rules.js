@@ -44,7 +44,7 @@ function setSendDailyReportRule() {
   // rule.hour = 21;
   // rule.minute = 29;
   // rule.tz = "EST";
-  schedule.scheduleJob({ hour: 21, minute: 29 }, async () => {
+  schedule.scheduleJob({ hour: 2, minute: 29 }, async () => {
     try {
       const dailyUsers = await DailyQuestion.findOne()
         .sort({ _id: -1 })
