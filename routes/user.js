@@ -2,10 +2,9 @@ const express = require("express");
 const router = express.Router();
 const User = require("../schema/userSchema");
 const Question = require("../schema/questionSchema");
-const moment = require("moment");
 
 router.post("/", async (req, res) => {
-  const { email, name } = req.body.params;
+  const { email, name } = req.body;
 
   const user = await User.findOne({ user_email: email });
   if (user) {
