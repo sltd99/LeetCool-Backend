@@ -10,11 +10,11 @@ const User = require("../schema/userSchema");
 
 function setFetchDailyRule() {
   console.log("setFetchDailyRule starts");
-  const rule = new schedule.RecurrenceRule();
-  rule.hour = 1;
-  rule.minute = 30;
-  rule.tz = "PST";
-  schedule.scheduleJob(rule, async () => {
+  // const rule = new schedule.RecurrenceRule();
+  // rule.hour = 1;
+  // rule.minute = 30;
+  // rule.tz = "PST";
+  schedule.scheduleJob({ hour: 5, minute: 30 }, async () => {
     try {
       const question_id = await fetchDaily();
       await sendMail(
@@ -36,11 +36,11 @@ function setFetchDailyRule() {
 
 function setSendDailyReportRule() {
   console.log("setSendDailyReportRule starts");
-  const rule = new schedule.RecurrenceRule();
-  rule.hour = 21;
-  rule.minute = 29;
-  rule.tz = "EST";
-  schedule.scheduleJob(rule, async () => {
+  // const rule = new schedule.RecurrenceRule();
+  // rule.hour = 21;
+  // rule.minute = 29;
+  // rule.tz = "EST";
+  schedule.scheduleJob({ hour: 21, minute: 30 }, async () => {
     try {
       const dailyUsers = await DailyQuestion.findOne()
         .sort({ _id: -1 })
@@ -73,11 +73,11 @@ function setSendDailyReportRule() {
 
 function setRefreshQuestionListRule() {
   console.log("setRefreshQuestionListRule starts");
-  const rule = new schedule.RecurrenceRule();
-  rule.hour = 1;
-  rule.minute = 1;
-  rule.tz = "PST";
-  schedule.scheduleJob(rule, async () => {
+  // const rule = new schedule.RecurrenceRule();
+  // rule.hour = 1;
+  // rule.minute = 1;
+  // rule.tz = "PST";
+  schedule.scheduleJob({ hour: 5, minute: 5 }, async () => {
     try {
       await refreshQuestionList();
       await sendMail(
