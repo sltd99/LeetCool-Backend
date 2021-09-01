@@ -3,6 +3,14 @@ const router = express.Router();
 const User = require("../schema/userSchema");
 const Question = require("../schema/questionSchema");
 
+router.get("/aaa", (req, res) => {
+  const message = `
+      <p>Message from leetcool</p>
+      <p>Question: <code>152</code> is today's daily question</p>
+      `;
+  res.json(message.replaceAll("\n", ""));
+});
+
 router.post("/", async (req, res) => {
   const { email, name } = req.body;
 

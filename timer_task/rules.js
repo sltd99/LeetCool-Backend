@@ -17,10 +17,14 @@ function setFetchDailyRule() {
   schedule.scheduleJob({ hour: 7, minute: 30 }, async () => {
     try {
       const question_id = await fetchDaily();
+      const message = `
+      <p>Message from leetcool</p>
+      <p>Question: <code>${question_id}</code> is today's daily question</p>
+      `;
       await sendMail(
         "qq836482561@gmail.com, hlin3517@gmail.com",
         "Fetch Daily Question Finished",
-        `Message from leetcool \n question number: ${question_id} is today's daily question`
+        message.replaceAll("\n", "")
       );
       console.log("Fetch Daily Finished");
     } catch (error) {

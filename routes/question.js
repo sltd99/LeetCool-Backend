@@ -63,7 +63,11 @@ router.post("/:question_id/solution", async (req, res) => {
 async function saveToDaily(question_id, user_id) {
   try {
     const todayDaily = await DailyQuestion.findOne().sort({ _id: -1 });
-    if (todayDaily.question.toString() !== question_id.toString()) {
+    if (
+      todayDaily.question.toString() !== question_id.toString() ||
+      todayDaily.users.includes(user_id)
+    ) {
+      console.log("not today's quesiton || user already in the daily list");
       return false;
     }
     const query = {
