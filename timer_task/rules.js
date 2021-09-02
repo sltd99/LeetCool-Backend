@@ -1,12 +1,11 @@
 const schedule = require("node-schedule");
-const { sendMail } = require("../timer_task/daily_report/send_email");
-const { fetchDaily } = require("../timer_task/playwright/fetch_daily");
-const {
-  refreshQuestionList,
-} = require("../timer_task/playwright/refresh_question_list");
+const { sendMail } = require("./daily_report/send_email");
+const { fetchDaily } = require("./playwright/fetch_daily");
+const { refreshQuestionList } = require("./playwright/refresh_question_list");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
-const DailyReportTemplate = require("../timer_task/daily_report/daily_report_template");
+const DailyReportTemplate = require("./daily_report/daily_report_template");
 const User = require("../schema/userSchema");
+const DB = require("../config/db");
 
 async function setFetchDailyRule() {
   console.log("setFetchDailyRule starts");
@@ -16,6 +15,7 @@ async function setFetchDailyRule() {
   // rule.tz = "PST";
   schedule.scheduleJob({ hour: 7, minute: 30 }, async () => {
     try {
+      const db = await DB.dbConnection();
       const question_id = await fetchDaily();
       const message = `
       <p>Message from leetcool</p>
@@ -26,8 +26,14 @@ async function setFetchDailyRule() {
         "Fetch Daily Question Finished",
         message.replaceAll("\n", "")
       );
+      if (db) {
+        await DB.dbClose(db);
+      }
       console.log("Fetch Daily Finished");
     } catch (error) {
+      if (db) {
+        await DB.dbClose(db);
+      }
       await sendMail(
         "qq836482561@gmail.com, hlin3517@gmail.com",
         "Fetch Daily Question Error",
@@ -40,12 +46,16 @@ async function setFetchDailyRule() {
 
 async function setSendDailyReportRule() {
   console.log("setSendDailyReportRule starts");
-  // const rule = new schedule.RecurrenceRule();
-  // rule.hour = 21;
-  // rule.minute = 29;
-  // rule.tz = "EST";
+  const rule = new schedule.RecurrenceRule();
+  rule.hour = 9;
+  rule.minute = 13;
+  rule.tz = "EST";
+
+  //2 30
   schedule.scheduleJob({ hour: 2, minute: 30 }, async () => {
     try {
+      const db = await DB.dbConnection();
+
       const dailyUsers = await DailyQuestion.findOne()
         .sort({ _id: -1 })
         .populate({ path: "users", select: ["user_email", "user_name"] })
@@ -67,15 +77,26 @@ async function setSendDailyReportRule() {
         usersDid,
         usersDidNot
       );
-
+      // recipients.substring(0, recipients.length - 2)
       await sendMail(
         recipients.substring(0, recipients.length - 2),
         subject,
         template
       );
+      if (db) {
+        await DB.dbClose(db);
+      }
       console.log("send daily report");
     } catch (error) {
-      saveCall();
+      if (db) {
+        await DB.dbClose(db);
+      }
+      await sendMail(
+        "qq836482561@gmail.com, hlin3517@gmail.com",
+        "Send Daily Report Error",
+        `Send Daily Report Error`
+      );
+      console.log("send daily fails");
     }
   });
 }
@@ -96,6 +117,9 @@ async function setRefreshQuestionListRule() {
       );
       console.log("Refresh Question Lis Finished");
     } catch (error) {
+      if (db) {
+        await DB.dbClose(db);
+      }
       await sendMail(
         "qq836482561@gmail.com, hlin3517@gmail.com",
         "Refreshed Question List Error",
@@ -104,40 +128,6 @@ async function setRefreshQuestionListRule() {
       console.log("Refresh Question List Error");
     }
   });
-}
-
-async function saveCall() {
-  try {
-    const dailyUsers = await DailyQuestion.findOne()
-      .sort({ _id: -1 })
-      .populate({ path: "users", select: ["user_email", "user_name"] })
-      .select("users");
-    const allUsers = await User.find().select("user_email user_name");
-    let recipients = "";
-    allUsers.map((user) => {
-      recipients += user.user_email + ", ";
-    });
-    const subject = "~ o(*￣▽￣*)o Daily Report From Leetcool";
-    const usersDid = dailyUsers.users;
-    const usersDidNot = allUsers.filter(
-      ({ user_email: email1 }) =>
-        !usersDid.some(({ user_email: email2 }) => {
-          return email1 == email2;
-        })
-    );
-    const template = DailyReportTemplate.dailyReportTemplate(
-      usersDid,
-      usersDidNot
-    );
-    await sendMail(recipients, subject, template);
-  } catch (error) {
-    await sendMail(
-      "qq836482561@gmail.com, hlin3517@gmail.com",
-      "Send Daily Report Error",
-      `Send Daily Report Error`
-    );
-    console.log("send daily fails");
-  }
 }
 
 setSendDailyReportRule();
