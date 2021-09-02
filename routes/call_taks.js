@@ -30,6 +30,7 @@ router.get("/send-daily-report", async (req, res) => {
     usersDid,
     usersDidNot
   );
+
   await SendMail.sendMail(recipients, subject, template);
 
   res.json({ template: template, subject: subject, recipients: recipients });

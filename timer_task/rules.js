@@ -28,7 +28,12 @@ async function setFetchDailyRule() {
       );
       console.log("Fetch Daily Finished");
     } catch (error) {
-      saveCall();
+      await sendMail(
+        "qq836482561@gmail.com, hlin3517@gmail.com",
+        "Fetch Daily Question Error",
+        `Fetch Daily Question Error`
+      );
+      console.log("Fetch Daily Error");
     }
   });
 }
@@ -62,6 +67,7 @@ async function setSendDailyReportRule() {
         usersDid,
         usersDidNot
       );
+
       await sendMail(
         recipients.substring(0, recipients.length - 2),
         subject,
@@ -69,12 +75,7 @@ async function setSendDailyReportRule() {
       );
       console.log("send daily report");
     } catch (error) {
-      await sendMail(
-        "qq836482561@gmail.com, hlin3517@gmail.com",
-        "Send Daily Report Error",
-        `Send Daily Report Error`
-      );
-      console.log("send daily fails");
+      saveCall();
     }
   });
 }
@@ -132,10 +133,10 @@ async function saveCall() {
   } catch (error) {
     await sendMail(
       "qq836482561@gmail.com, hlin3517@gmail.com",
-      "Fetch Daily Question Error",
-      `Fetch Daily Question Error`
+      "Send Daily Report Error",
+      `Send Daily Report Error`
     );
-    console.log("Fetch Daily Error");
+    console.log("send daily fails");
   }
 }
 
