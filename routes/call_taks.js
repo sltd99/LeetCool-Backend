@@ -32,7 +32,7 @@ router.get("/send-daily-report", async (req, res) => {
   );
   await SendMail.sendMail(recipients, subject, template);
 
-  res.json(template);
+  res.json({ template: template, subject: subject, recipients: recipients });
 });
 
 router.get("/fetch_daily", async (req, res) => {
