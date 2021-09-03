@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const rules = require("../timer_task/rules");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
 const User = require("../schema/userSchema");
-const FetchDaily = require("../timer_task/playwright/fetch_daily");
-const RefreshQuestionList = require("../timer_task/playwright/refresh_question_list");
-const SendMail = require("../timer_task/daily_report/send_email");
+const { fetchDaily } = require("../timer_task/playwright/fetch_daily");
+const {
+  refreshQuestionList,
+} = require("../timer_task/playwright/refresh_question_list");
+const { sendMail } = require("../timer_task/daily_report/send_email");
 const DailyReportTemplate = require("../timer_task/daily_report/daily_report_template");
 
 router.get("/send-daily-report", async (req, res) => {
@@ -31,15 +32,23 @@ router.get("/send-daily-report", async (req, res) => {
     usersDidNot
   );
 
-  await SendMail.sendMail(recipients, subject, template);
-
+  const result = await sendMail(recipients, subject, template);
   res.json({ template: template, subject: subject, recipients: recipients });
 });
 
 router.get("/fetch_daily", async (req, res) => {
   try {
-    const result = await FetchDaily.fetchDaily();
-    res.json(result);
+    const question_id = await fetchDaily();
+    const message = `
+      <p>Message from leetcool</p>
+      <p>Question: <code>${question_id}</code> is today's daily question</p>
+      `;
+    const result = await sendMail(
+      "qq836482561@gmail.com, hlin3517@gmail.com",
+      "Fetch Daily Question Finished",
+      message.replaceAll("\n", "")
+    );
+    res.json(question_id);
   } catch (error) {
     res.json(error);
   }
@@ -47,7 +56,16 @@ router.get("/fetch_daily", async (req, res) => {
 
 router.get("/refersh_question_list", async (req, res) => {
   try {
-    const result = await RefreshQuestionList();
+    const result = await refreshQuestionList();
+    const message = `
+      <p>Message from leetcool</p>
+      <p>Refreshed Question List</p>
+      `;
+    await sendMail(
+      "qq836482561@gmail.com, hlin3517@gmail.com",
+      "Refreshed Question List",
+      message.replaceAll("\n", "")
+    );
     res.json(result);
   } catch (error) {
     res.json(error);

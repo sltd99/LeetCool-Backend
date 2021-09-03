@@ -1,6 +1,6 @@
 require("dotenv/config");
 require("./config/db");
-const { dbConnection } = require("./config/db");
+require("./timer_task/rules");
 var createError = require("http-errors");
 var express = require("express");
 var cookieParser = require("cookie-parser");
@@ -12,7 +12,6 @@ var callTaksRouter = require("./routes/call_taks");
 var app = express();
 const cors = require("cors");
 
-dbConnection();
 app.use(cors());
 app.use(logger("dev"));
 app.use(express.json());

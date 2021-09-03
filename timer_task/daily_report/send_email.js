@@ -31,7 +31,6 @@ async function sendMail(recipient, subject, message) {
       subject: subject,
       html: message,
     };
-
     const result = await transport.sendMail(mailOptions);
     return result;
   } catch (error) {
