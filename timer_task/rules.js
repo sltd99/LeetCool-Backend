@@ -1,12 +1,13 @@
 const schedule = require("node-schedule");
 const { sendMail } = require("./daily_report/send_email");
 const axios = require("axios");
+const url = "https://leet-cool-backend.herokuapp.com/";
 
 async function setFetchDailyRule() {
   console.log("setFetchDailyRule starts");
   schedule.scheduleJob({ hour: 7, minute: 30 }, async () => {
     try {
-      await axios.get(process.env.URL + "/fetch_daily");
+      await axios.get(url + "call-tasks/fetch-daily");
       console.log("Fetch Daily success");
     } catch (error) {
       await sendMail(
@@ -23,7 +24,7 @@ async function setSendDailyReportRule() {
   console.log("setSendDailyReportRule starts");
   schedule.scheduleJob({ hour: 2, minute: 30 }, async () => {
     try {
-      await axios.get(process.env.URL + "call-tasks/send-daily-report");
+      await axios.get(url + "call-tasks/send-daily-report");
       console.log("send daily report success");
     } catch (error) {
       await sendMail(
@@ -40,7 +41,7 @@ async function setRefreshQuestionListRule() {
   console.log("setRefreshQuestionListRule starts");
   schedule.scheduleJob({ hour: 7, minute: 1, dayOfWeek: 0 }, async () => {
     try {
-      await axios.get(process.env.URL + "/refersh_question_list");
+      await axios.get(url + "call-tasks/refersh-question-list");
       console.log("Refresh Question List success");
     } catch (error) {
       const message = `

@@ -36,7 +36,7 @@ router.get("/send-daily-report", async (req, res) => {
   res.json({ template: template, subject: subject, recipients: recipients });
 });
 
-router.get("/fetch_daily", async (req, res) => {
+router.get("/fetch-daily", async (req, res) => {
   try {
     const question_id = await fetchDaily();
     const message = `
@@ -54,7 +54,7 @@ router.get("/fetch_daily", async (req, res) => {
   }
 });
 
-router.get("/refersh_question_list", async (req, res) => {
+router.get("/refersh-question-list", async (req, res) => {
   try {
     const result = await refreshQuestionList();
     const message = `
