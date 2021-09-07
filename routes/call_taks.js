@@ -6,7 +6,7 @@ const { fetchDaily } = require("../timer_task/playwright/fetch_daily");
 const {
   refreshQuestionList,
 } = require("../timer_task/playwright/refresh_question_list");
-const { sendMail } = require("../timer_task/daily_report/send_email");
+const SendMail = require("../timer_task/daily_report/send_email");
 const DailyReportTemplate = require("../timer_task/daily_report/daily_report_template");
 
 router.get("/send-daily-report", async (req, res) => {
@@ -49,7 +49,7 @@ router.get("/fetch-daily", async (req, res) => {
       <p>Question: <code>${question_id}</code> is today's daily question</p>
       `;
     console.log(question_id);
-    const result = await sendMail(
+    const result = await SendMail.sendMail(
       "qq836482561@gmail.com",
       "Fetch Daily Question Finished",
       message.replaceAll("\n", "")
