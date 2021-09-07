@@ -8,6 +8,8 @@ async function sendMail(recipient, subject, message) {
   const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
   const USER = process.env.USER;
 
+  console.log(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, USER);
+
   const OAuth2 = google.auth.OAuth2;
   const OAuth2_client = new OAuth2(CLIENT_ID, CLIENT_SECRET);
   OAuth2_client.setCredentials({ refresh_token: REFRESH_TOKEN });
