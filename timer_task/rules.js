@@ -51,7 +51,7 @@ async function setRefreshQuestionListRule() {
       await sendMail(
         "qq836482561@gmail.com, hlin3517@gmail.com",
         "Refreshed Question List Error",
-        message.replaceAll("\n", "")
+        message
       );
       console.log("Refresh Question List Error");
     }

@@ -33,7 +33,7 @@ router.get("/send-daily-report", async (req, res) => {
       usersDidNot
     );
 
-    const result = await sendMail(recipients, subject, template);
+    const result = await SendMail.sendMail(recipients, subject, template);
     res.json({ template: template, subject: subject, recipients: recipients });
   } catch (error) {
     console.log("error");
@@ -46,16 +46,15 @@ router.get("/fetch-daily", async (req, res) => {
     const question_id = await fetchDaily();
     const message = `
       <p>Message from leetcool</p>
-      <p>Question: <code>${question_id}</code> is today's daily question</p>
+      <p>Question Number: <code>${question_id}</code> is today's daily question</p>
       `;
     console.log(question_id);
     const result = await SendMail.sendMail(
-      "qq836482561@gmail.com",
+      "qq836482561@gmail.com, hlin3517@gmail.com",
       "Fetch Daily Question Finished",
-      message
+      message.split("\n").join("")
     );
-    console.log(result);
-    res.json(question_id);
+    res.json(result);
   } catch (error) {
     console.log("Fetch Daily error");
     res.json(error);
@@ -69,10 +68,10 @@ router.get("/refersh-question-list", async (req, res) => {
       <p>Message from leetcool</p>
       <p>Refreshed Question List</p>
       `;
-    await sendMail(
+    await SendMail.sendMail(
       "qq836482561@gmail.com, hlin3517@gmail.com",
       "Refreshed Question List",
-      message.replaceAll("\n", "")
+      message.split("\n").join("")
     );
     res.json(result);
   } catch (error) {

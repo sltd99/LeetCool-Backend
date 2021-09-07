@@ -68,7 +68,7 @@ function dailyReportTemplate(usersDid, usersDidNot) {
   template += `
         </table>
     </div>`;
-  return template.replaceAll("\n", "");
+  return template.split("\n").join("");
 }
 
 module.exports.dailyReportTemplate = dailyReportTemplate;
