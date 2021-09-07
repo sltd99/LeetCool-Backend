@@ -53,8 +53,10 @@ router.get("/fetch-daily", async (req, res) => {
       "Fetch Daily Question Finished",
       message.replaceAll("\n", "")
     );
+    console.log(result);
     res.json(question_id);
   } catch (error) {
+    console.log("Fetch Daily error");
     res.json(error);
   }
 });
