@@ -1,6 +1,5 @@
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
-const OAuth2 = google.auth.OAuth2;
 
 async function sendMail(recipient, subject, message) {
   const CLIENT_ID = process.env.CLIENT_ID;
@@ -9,6 +8,7 @@ async function sendMail(recipient, subject, message) {
   const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
   const USER = process.env.USER;
 
+  const OAuth2 = google.auth.OAuth2;
   const OAuth2_client = new OAuth2(CLIENT_ID, CLIENT_SECRET);
   OAuth2_client.setCredentials({ refresh_token: REFRESH_TOKEN });
   try {
@@ -32,8 +32,10 @@ async function sendMail(recipient, subject, message) {
       html: message,
     };
     const result = await transport.sendMail(mailOptions);
+    console.log("try + Send_email: ", result);
     return result;
   } catch (error) {
+    console.log("catch + Send_email: ", error);
     return error;
   }
 }
