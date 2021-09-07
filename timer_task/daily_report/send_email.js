@@ -2,11 +2,19 @@ const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 
 async function sendMail(recipient, subject, message) {
-  const CLIENT_ID = process.env.CLIENT_ID;
-  const CLIENT_SECRET = process.env.CLIENT_SECRET;
+  // const CLIENT_ID = process.env.CLIENT_ID;
+  // const CLIENT_SECRET = process.env.CLIENT_SECRET;
+  // const REDIRECT_URL = process.env.REDIRECT_URL;
+  // const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+  // const USER = process.env.USER;
+
+  const CLIENT_ID =
+    "630647017025-7dtpmh018j7s5qiuvrp79q9fg8lh3rai.apps.googleusercontent.com";
+  const CLIENT_SECRET = "KL2RRRhYjqzD-j9761fjymsz";
   const REDIRECT_URL = process.env.REDIRECT_URL;
-  const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
-  const USER = process.env.USER;
+  const REFRESH_TOKEN =
+    "1//04zA_EwbmAHw6CgYIARAAGAQSNwF-L9Ir_goE3pB-eH5wc5-HMkouZ6-wrTuZJlxXeDWIE2lmhunuY-AFuPdm58hqJXs6Zf1z5aU";
+  const USER = "longlonglu68@gmail.com";
 
   console.log(CLIENT_ID, CLIENT_SECRET, REFRESH_TOKEN, USER);
 
