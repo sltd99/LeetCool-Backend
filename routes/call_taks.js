@@ -48,8 +48,9 @@ router.get("/fetch-daily", async (req, res) => {
       <p>Message from leetcool</p>
       <p>Question: <code>${question_id}</code> is today's daily question</p>
       `;
+    console.log(question_id);
     const result = await sendMail(
-      "qq836482561@gmail.com, hlin3517@gmail.com",
+      "qq836482561@gmail.com",
       "Fetch Daily Question Finished",
       message.replaceAll("\n", "")
     );
