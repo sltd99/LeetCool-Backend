@@ -3,24 +3,29 @@ const router = express.Router();
 const User = require("../schema/userSchema");
 const Question = require("../schema/questionSchema");
 
-router.get("/aaa", (req, res) => {
-  const message = `
-      <p>Message from leetcool</p>
-      <p>Question: <code>152</code> is today's daily question</p>
-      `;
-  res.json(message.replaceAll("\n", ""));
-});
-
 router.post("/", async (req, res) => {
-  const { email, name } = req.body;
+  const { email, name, image_url } = req.body;
 
   const user = await User.findOne({ user_email: email });
   if (user) {
+    await User.findOneAndUpdate(
+      { user_email: email },
+      {
+        $set: {
+          user_email: email,
+          user_name: name,
+          user_image_url: image_url,
+          last_login: Date.now(),
+        },
+      }
+    );
     res.json({ user_id: user._id });
   } else {
     const saveUser = new User({
       user_email: email,
       user_name: name,
+      user_image_url: image_url,
+      last_login: null,
     });
     const result = await saveUser.save();
     if (result) {

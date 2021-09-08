@@ -145,7 +145,7 @@ router.get("/", async (req, res) => {
       ])
         .populate({
           path: "question_answers.user",
-          select: "user_name",
+          select: "user_name user_image_url",
         })
         .sort({ question_last_submit_date: "descending" }),
       DailyQuestion.findOne()
@@ -157,7 +157,7 @@ router.get("/", async (req, res) => {
         })
         .populate({
           path: "users",
-          select: "user_name",
+          select: "user_name user_image_url",
         }),
     ]);
 

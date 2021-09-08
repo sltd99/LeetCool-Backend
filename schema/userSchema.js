@@ -12,6 +12,14 @@ const userSchema = mongoose.Schema({
     type: Number,
     default: 0,
   },
+  user_image_url: {
+    type: String,
+  },
+  last_login: {
+    type: Date,
+    required: true,
+    default: Date.now,
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);
