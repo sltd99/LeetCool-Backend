@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const Question = require("../schema/questionSchema");
 const DailyQuestion = require("../schema/dailyQuestionSchema");
-const CommonVariable = require("../schema/commonVariableSchema");
 const User = require("../schema/userSchema");
 
 router.post("/:question_id/solution", async (req, res) => {

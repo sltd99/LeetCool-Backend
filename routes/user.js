@@ -4,35 +4,39 @@ const User = require("../schema/userSchema");
 const Question = require("../schema/questionSchema");
 
 router.post("/", async (req, res) => {
-  const { email, name, image_url } = req.body;
-
-  const user = await User.findOne({ user_email: email });
-  if (user) {
-    await User.findOneAndUpdate(
-      { user_email: email },
-      {
-        $set: {
-          user_email: email,
-          user_name: name,
-          user_image_url: image_url,
-          last_login: Date.now(),
-        },
-      }
-    );
-    res.json({ user_id: user._id });
-  } else {
-    const saveUser = new User({
-      user_email: email,
-      user_name: name,
-      user_image_url: image_url,
-      last_login: null,
-    });
-    const result = await saveUser.save();
-    if (result) {
-      res.json({ user_id: result._id });
+  try {
+    const { email, name, image_url } = req.body;
+    const user = await User.findOne({ user_email: email });
+    if (user) {
+      await User.findOneAndUpdate(
+        { user_email: email },
+        {
+          $set: {
+            user_email: email,
+            user_name: name,
+            user_image_url: image_url,
+            last_login: Date.now(),
+          },
+        }
+      );
+      res.json({ user_id: user._id });
     } else {
-      res.json({ message: "fail" });
+      const saveUser = new User({
+        user_email: email,
+        user_name: name,
+        user_image_url: image_url,
+        last_login: null,
+      });
+      const result = await saveUser.save();
+      if (result) {
+        res.json({ user_id: result._id });
+      } else {
+        res.json({ message: "fails" });
+      }
     }
+  } catch (error) {
+    console.log("users/ error");
+    res.json({ message: "fails" });
   }
 });
 
@@ -49,25 +53,6 @@ router.get("/performance", async (req, res) => {
   }
 });
 
-/*
-  const today = moment().startOf("day");
-{
-    question_is_answered: true,
-    question_last_submit_date: {
-      $gte: today.toDate(),
-      $lte: moment(today).endOf("day").toDate(),
-    },
-    "question_answers.question_date": {
-      $gte: today.toDate(),
-      $lte: moment(today).endOf("day").toDate(),
-    },
-  }
-
-  .populate({
-    path: "question_answers.user",
-    select: ["user_name", "user_email"],
-  });
-*/
 router.get("/one/:user_id", async (req, res) => {
   try {
     const { user_id } = req.params;

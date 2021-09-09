@@ -1,7 +1,7 @@
 function dailyReportTemplate(usersDid, usersDidNot) {
   var template = `
     <div>
-    <p>嗯~ o(*￣▽￣*)o， 今天下面几位同学没有做daily。 加油</p>
+    <p>嗯~ o(*￣▽￣*)o， 昨天下面几位同学没有做daily。 加油</p>
     <table
         style='
         width: 100%;

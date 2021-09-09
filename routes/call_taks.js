@@ -8,11 +8,18 @@ const {
 } = require("../timer_task/playwright/refresh_question_list");
 const SendMail = require("../timer_task/daily_report/send_email");
 const DailyReportTemplate = require("../timer_task/daily_report/daily_report_template");
+const moment = require("moment");
 
 router.get("/send-daily-report", async (req, res) => {
   try {
-    const dailyUsers = await DailyQuestion.findOne()
-      .sort({ _id: -1 })
+    const yesterday = moment().add(-1, "days").startOf("days");
+    const query = {
+      date: {
+        $gte: yesterday.toDate(),
+        $lte: moment(yesterday).endOf("day").toDate(),
+      },
+    };
+    const dailyUsers = await DailyQuestion.find(query)
       .populate({ path: "users", select: ["user_email", "user_name"] })
       .select("users");
     const allUsers = await User.find().select("user_email user_name");
@@ -34,7 +41,7 @@ router.get("/send-daily-report", async (req, res) => {
     );
 
     const result = await SendMail.sendMail(recipients, subject, template);
-    res.json({ template: template, subject: subject, recipients: recipients });
+    res.json(result);
   } catch (error) {
     console.log("error");
     res.json("error");
