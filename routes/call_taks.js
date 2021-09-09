@@ -23,12 +23,15 @@ router.get("/send-daily-report", async (req, res) => {
       .populate({ path: "users", select: ["user_email", "user_name"] })
       .select("users");
     const allUsers = await User.find().select("user_email user_name");
+
     let recipients = "";
     allUsers.map((user) => {
       recipients += user.user_email + ", ";
     });
+
     const subject = "~ o(*￣▽￣*)o Daily Report From Leetcool";
-    const usersDid = dailyUsers.users;
+    const usersDid = dailyUsers[0].users;
+
     const usersDidNot = allUsers.filter(
       ({ user_email: email1 }) =>
         !usersDid.some(({ user_email: email2 }) => {
