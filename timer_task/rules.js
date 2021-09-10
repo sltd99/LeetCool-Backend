@@ -5,7 +5,7 @@ const url = "https://leet-cool-backend.herokuapp.com/";
 
 async function setFetchDailyRule() {
   console.log("setFetchDailyRule starts");
-  schedule.scheduleJob({ hour: 4, minute: 30 }, async () => {
+  schedule.scheduleJob({ hour: 7, minute: 30 }, async () => {
     try {
       await axios.get(url + "call-tasks/fetch-daily");
       console.log("Fetch Daily success");
