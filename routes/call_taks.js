@@ -6,7 +6,7 @@ const { fetchDaily } = require("../timer_task/playwright/fetch_daily");
 const {
   refreshQuestionList,
 } = require("../timer_task/playwright/refresh_question_list");
-const SendMail = require("../timer_task/daily_report/send_email");
+const SendMail = require("../timer_task/daily_report/send_grid");
 const DailyReportTemplate = require("../timer_task/daily_report/daily_report_template");
 const moment = require("moment");
 
@@ -24,9 +24,9 @@ router.get("/send-daily-report", async (req, res) => {
       .select("users");
     const allUsers = await User.find().select("user_email user_name");
 
-    let recipients = "";
+    let recipients = [];
     allUsers.map((user) => {
-      recipients += user.user_email + ", ";
+      recipients.push(user.user_email);
     });
 
     const subject = "~ o(*￣▽￣*)o Daily Report From Leetcool";
@@ -60,7 +60,7 @@ router.get("/fetch-daily", async (req, res) => {
       `;
     console.log(question_id);
     const result = await SendMail.sendMail(
-      "qq836482561@gmail.com, hlin3517@gmail.com",
+      ["longlonglu68@gmail.com", "hlin3517@gmail.com"],
       "Fetch Daily Question Finished",
       message.split("\n").join("")
     );
@@ -79,7 +79,7 @@ router.get("/refersh-question-list", async (req, res) => {
       <p>Refreshed Question List</p>
       `;
     await SendMail.sendMail(
-      "qq836482561@gmail.com, hlin3517@gmail.com",
+      ["longlonglu68@gmail.com", "hlin3517@gmail.com"],
       "Refreshed Question List",
       message.split("\n").join("")
     );

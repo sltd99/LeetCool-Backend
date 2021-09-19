@@ -112,6 +112,7 @@ router.post("/:question_id", async (req, res) => {
           question_content: question.question_content,
           question_answer: answer.length != 0 ? answer[0].question_answer : "",
         };
+        console.log(result);
         res.json(result);
       } else {
         res.json(question);
