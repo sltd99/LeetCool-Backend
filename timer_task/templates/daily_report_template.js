@@ -1,7 +1,8 @@
-function dailyReportTemplate(usersDid, usersDidNot) {
-  var template = `
+function dailyReportTemplate(usersDid, usersDidNot, dailyQuestion) {
+  var template = ` 
+    <span>今天的daily 是 <a href='${dailyQuestion.question_url}'> ${dailyQuestion.question_id}:  ${dailyQuestion.question_title}</a> 🧐</span>
     <div>
-    <p>嗯~ o(*￣▽￣*)o， 昨天下面几位同学没有做daily。 加油</p>
+    <p>嗯~ o(*￣▽￣*)o， 昨天下面几位同学没有做daily。 加油 (●'◡'●)</p>
     <table
         style='
         width: 100%;
@@ -35,7 +36,7 @@ function dailyReportTemplate(usersDid, usersDidNot) {
     </table>
     <br />
     <br />
-    <p>嗯~ o(*￣▽￣*)o， 表扬一下下面的同学。 别骄傲</p>
+    <p>嗯~ o(*￣▽￣*)o， 表扬一下下面的同学。 别骄傲 ╰(*°▽°*)╯</p>
     <table
         style='
           width: 100%;
