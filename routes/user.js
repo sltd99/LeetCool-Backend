@@ -25,7 +25,7 @@ router.post("/", async (req, res) => {
         user_email: email,
         user_name: name,
         user_image_url: image_url,
-        last_login: null,
+        last_login: Date.now(),
       });
       const result = await saveUser.save();
       if (result) {
